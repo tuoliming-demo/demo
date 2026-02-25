@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI客户服务系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        .app-container {
+            display: flex;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .sidebar-header h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .sidebar-menu {
+            flex: 1;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.1);
+        }
+        .menu-item:hover, .menu-item.active {
+            background: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+        .menu-item i {
+            margin-right: 15px;
+            font-size: 18px;
+        }
+        .menu-item span {
+            font-weight: 500;
+        }
+        .model-selector {
+            margin-top: 30px;
+        }
+        .model-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .model-selector select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            cursor: pointer;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .content-header {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .content-header h1 {
+            font-size: 24px;
+            color: #2c3e50;
+        }
+        .content-body {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+        }
+        .module-content {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+        }
+        .module-content.active {
+            display: flex;
+        }
+        /* 聊天模块 */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+        .message.user {
+            justify-content: flex-end;
+        }
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+        }
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .message.ai .message-content {
+            background: white;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        .message.user .message-avatar {
+            background: #667eea;
+            order: 2;
+        }
+        .message.ai .message-avatar {
+            background: #00f2fe;
+        }
+        .chat-input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .message-input:focus {
+            border-color: #667eea;
+        }
+        .send-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+        .send-button:hover {
+            transform: translateY(-2px);
+        }
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #666;
+        }
+        /* 客户管理模块 */
+        .customers-container {
+            padding: 30px;
+        }
+        .customers-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .add-customer-btn {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .customers-list {
+            display: grid;
+            gap: 15px;
+        }
+        .customer-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        .customer-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .customer-email {
+            color: #666;
+        }
+        /* 分析模块 */
+        .analytics-container {
+            padding: 30px;
+        }
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .analytics-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .analytics-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .analytics-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .sentiment-chart {
+            margin-top: 20px;
+        }
+        .sentiment-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .sentiment-label {
+            width: 80px;
+            font-size: 14px;
+        }
+        .sentiment-progress {
+            flex: 1;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+        .sentiment-fill {
+            height: 100%;
+            border-radius: 10px;
+        }
+        .positive .sentiment-fill { background: #28a745; }
+        .negative .sentiment-fill { background: #dc3545; }
+        .neutral .sentiment-fill { background: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>AI客户服务</h2>
+                <p>智能客服系统</p>
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item active" data-module="chat">
+                    <i>💬</i>
+                    <span>智能聊天</span>
+                </div>
+                <div class="menu-item" data-module="customers">
+                    <i>👥</i>
+                    <span>客户管理</span>
+                </div>
+                <div class="menu-item" data-module="analytics">
+                    <i>📊</i>
+                    <span>数据分析</span>
+                </div>
+            </div>
+            <div class="model-selector">
+                <label for="model-select">AI模型</label>
+                <select id="model-select">
+                    <option value="MiniMax-M2.5">MiniMax M2.5</option>
+                    <option value="GPT-3.5">GPT-3.5 Turbo</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="content-header">
+                <h1 id="module-title">智能聊天</h1>
+            </div>
+
+            <div class="content-body">
+                <!-- 聊天模块 -->
+                <div id="chat-module" class="module-content active">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="message ai">
+                                <div class="message-avatar">AI</div>
+                                <div class="message-content">
+                                    您好！我是AI客户服务助手，请问有什么可以帮助您的？
+                                </div>
+                            </div>
+                        </div>
+                        <div class="loading" id="loading">AI正在思考中...</div>
+                        <div class="chat-input-area">
+                            <input type="text" id="message-input" class="message-input" placeholder="输入您的问题，按回车发送...">
+                            <button id="send-button" class="send-button">发送</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 客户管理模块 -->
+                <div id="customers-module" class="module-content">
+                    <div class="customers-container">
+                        <div class="customers-header">
+                            <h2>客户列表</h2>
+                            <button class="add-customer-btn" onclick="showAddCustomerModal()">添加客户</button>
+                        </div>
+                        <div class="customers-list" id="customers-list">
+                            <!-- 客户卡片将在这里动态加载 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分析模块 -->
+                <div id="analytics-module" class="module-content">
+                    <div class="analytics-container">
+                        <h2>数据分析</h2>
+                        <div class="analytics-grid" id="analytics-grid">
+                            <!-- 分析卡片将在这里动态加载 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加客户模态框 -->
+    <div id="add-customer-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 30px; border-radius: 12px; width: 400px;">
+            <h3>添加新客户</h3>
+            <input type="text" id="customer-name" placeholder="客户姓名" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px;">
+            <input type="email" id="customer-email" placeholder="客户邮箱" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px;">
+            <div style="text-align: right; margin-top: 20px;">
+                <button onclick="hideAddCustomerModal()" style="padding: 10px 20px; margin-right: 10px; border: 1px solid #ddd; border-radius: 8px; background: white;">取消</button>
+                <button onclick="addCustomer()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 8px;">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const chatMessages = document.getElementById('chat-messages');
+        const modelSelect = document.getElementById('model-select');
+        const loading = document.getElementById('loading');
+        const moduleTitle = document.getElementById('module-title');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const moduleContents = document.querySelectorAll('.module-content');
+
+        // 模块切换
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const module = item.dataset.module;
+                switchModule(module);
+            });
+        });
+
+        function switchModule(module) {
+            // 更新菜单激活状态
+            menuItems.forEach(item => item.classList.remove('active'));
+            document.querySelector(`[data-module="${module}"]`).classList.add('active');
+
+            // 更新内容显示
+            moduleContents.forEach(content => content.classList.remove('active'));
+            document.getElementById(`${module}-module`).classList.add('active');
+
+            // 更新标题
+            const titles = {
+                chat: '智能聊天',
+                customers: '客户管理',
+                analytics: '数据分析'
+            };
+            moduleTitle.textContent = titles[module];
+
+            // 加载模块数据
+            if (module === 'customers') loadCustomers();
+            if (module === 'analytics') loadAnalytics();
+        }
+
+        // 回车发送消息
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // 点击发送按钮
+        sendButton.addEventListener('click', sendMessage);
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            const model = modelSelect.value;
+
+            // 添加用户消息
+            addMessage('user', message);
+            messageInput.value = '';
+
+            // 显示加载状态
+            loading.style.display = 'block';
+            sendButton.disabled = true;
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message, model: model })
+                });
+
+                const data = await response.json();
+
+                if (data.response) {
+                    addMessage('ai', data.response);
+                } else {
+                    addMessage('ai', '抱歉，发生了错误：' + data.error);
+                }
+            } catch (error) {
+                addMessage('ai', '网络错误，请稍后重试');
+            } finally {
+                loading.style.display = 'none';
+                sendButton.disabled = false;
+            }
+        }
+
+        function addMessage(type, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = type === 'user' ? '我' : 'AI';
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = content;
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 客户管理功能
+        async function loadCustomers() {
+            try {
+                const response = await fetch('/customers');
+                const customers = await response.json();
+                const customersList = document.getElementById('customers-list');
+                customersList.innerHTML = '';
+
+                customers.forEach(customer => {
+                    const customerCard = document.createElement('div');
+                    customerCard.className = 'customer-card';
+                    customerCard.innerHTML = `
+                        <div class="customer-name">${customer.name}</div>
+                        <div class="customer-email">${customer.email}</div>
+                    `;
+                    customersList.appendChild(customerCard);
+                });
+            } catch (error) {
+                console.error('Failed to load customers:', error);
+            }
+        }
+
+        function showAddCustomerModal() {
+            document.getElementById('add-customer-modal').style.display = 'flex';
+        }
+
+        function hideAddCustomerModal() {
+            document.getElementById('add-customer-modal').style.display = 'none';
+        }
+
+        async function addCustomer() {
+            const name = document.getElementById('customer-name').value;
+            const email = document.getElementById('customer-email').value;
+
+            if (!name || !email) {
+                alert('请填写完整信息');
+                return;
+            }
+
+            try {
+                const response = await fetch('/customers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, email: email })
+                });
+
+                if (response.ok) {
+                    hideAddCustomerModal();
+                    document.getElementById('customer-name').value = '';
+                    document.getElementById('customer-email').value = '';
+                    loadCustomers();
+                } else {
+                    alert('添加失败');
+                }
+            } catch (error) {
+                alert('网络错误');
+            }
+        }
+
+        // 分析功能
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/analytics');
+                const data = await response.json();
+                const analyticsGrid = document.getElementById('analytics-grid');
+                analyticsGrid.innerHTML = '';
+
+                // 总客户数
+                analyticsGrid.innerHTML += `
+                    <div class="analytics-card">
+                        <div class="analytics-number">${data.total_customers}</div>
+                        <div class="analytics-label">总客户数</div>
+                    </div>
+                `;
+
+                // 总交互数
+                analyticsGrid.innerHTML += `
+                    <div class="analytics-card">
+                        <div class="analytics-number">${data.total_interactions}</div>
+                        <div class="analytics-label">总交互数</div>
+                    </div>
+                `;
+
+                // 情感分布
+                const sentimentCard = document.createElement('div');
+                sentimentCard.className = 'analytics-card';
+                sentimentCard.innerHTML = `
+                    <div class="analytics-label" style="margin-bottom: 20px;">情感分布</div>
+                    <div class="sentiment-chart">
+                        ${Object.entries(data.sentiment_distribution).map(([sentiment, count]) => `
+                            <div class="sentiment-bar ${sentiment}">
+                                <div class="sentiment-label">${sentiment}</div>
+                                <div class="sentiment-progress">
+                                    <div class="sentiment-fill" style="width: ${(count / data.total_interactions * 100) || 0}%"></div>
+                                </div>
+                                <div>${count}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                analyticsGrid.appendChild(sentimentCard);
+
+            } catch (error) {
+                console.error('Failed to load analytics:', error);
+            }
+        }
+
+        // 初始化
+        switchModule('chat');
+    </script>
+</body>
+</html>
