@@ -156,11 +156,11 @@ def call_minimax(message):
     data = {
         "model": "MiniMax-M2.5",
         "messages": [
-            {"role": "system", "content": "You are a helpful customer service AI. Respond directly and concisely in plain text only. Do not include any thinking process, reasoning steps, or internal monologue. Do not use any markdown formatting, bold text, italic text, links, code blocks, or special characters. Give direct, helpful answers to customer questions. Do not mention that you are an AI unless specifically asked."},
+            {"role": "system", "content": "你是友好的客服助手。用简单中文回答问题。直接回答，不要解释。"},
             {"role": "user", "content": message}
         ],
-        "temperature": 0.7,
-        "max_tokens": 500,
+        "temperature": 0.5,
+        "max_tokens": 100,
         "stream": False
     }
     response = requests.post(MINIMAX_URL, headers=headers, json=data)
@@ -191,11 +191,11 @@ def call_openai(message):
     data = {
         "model": "gpt-3.5-turbo",
         "messages": [
-            {"role": "system", "content": "You are a helpful customer service AI. Respond directly and concisely in plain text only. Do not include any thinking process, reasoning steps, or internal monologue. Do not use any markdown formatting, bold text, italic text, links, code blocks, or special characters. Give direct, helpful answers to customer questions. Do not mention that you are an AI unless specifically asked."},
+            {"role": "system", "content": "你是友好的客服助手。用简单中文回答问题。直接回答，不要解释。"},
             {"role": "user", "content": message}
         ],
-        "temperature": 0.7,
-        "max_tokens": 500
+        "temperature": 0.5,
+        "max_tokens": 100
     }
     response = requests.post(OPENAI_URL, headers=headers, json=data)
     response.raise_for_status()
