@@ -242,6 +242,209 @@
         .customer-email {
             color: #666;
         }
+        /* 任务管理模块 */
+        .tasks-container {
+            padding: 30px;
+        }
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .tasks-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .tasks-controls select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+        }
+        .add-task-btn {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .tasks-list {
+            display: grid;
+            gap: 15px;
+        }
+        .task-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .task-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .task-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        .task-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-in_progress {
+            background: #cce5ff;
+            color: #004085;
+        }
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .task-priority {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .priority-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .priority-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .priority-low {
+            background: #d4edda;
+            color: #155724;
+        }
+        .task-description {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .task-action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .edit-btn {
+            background: #007bff;
+            color: white;
+        }
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+        .close {
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+        }
+        .modal-body {
+            padding: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 20px 30px;
+            border-top: 1px solid #e9ecef;
+        }
+        .modal-footer button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .modal-footer button:first-child {
+            background: #6c757d;
+            color: white;
+        }
+        .modal-footer button:last-child {
+            background: #28a745;
+            color: white;
+        }
         /* 分析模块 */
         .analytics-container {
             padding: 30px;
@@ -313,6 +516,10 @@
                     <i>👥</i>
                     <span>客户管理</span>
                 </div>
+                <div class="menu-item" data-module="tasks">
+                    <i>📋</i>
+                    <span>任务管理</span>
+                </div>
                 <div class="menu-item" data-module="analytics">
                     <i>📊</i>
                     <span>数据分析</span>
@@ -361,6 +568,34 @@
                         </div>
                         <div class="customers-list" id="customers-list">
                             <!-- 客户卡片将在这里动态加载 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 任务管理模块 -->
+                <div id="tasks-module" class="module-content">
+                    <div class="tasks-container">
+                        <div class="tasks-header">
+                            <h2>任务管理</h2>
+                            <div class="tasks-controls">
+                                <select id="status-filter" onchange="filterTasks()">
+                                    <option value="">全部状态</option>
+                                    <option value="pending">待处理</option>
+                                    <option value="in_progress">进行中</option>
+                                    <option value="completed">已完成</option>
+                                    <option value="cancelled">已取消</option>
+                                </select>
+                                <select id="priority-filter" onchange="filterTasks()">
+                                    <option value="">全部优先级</option>
+                                    <option value="high">高</option>
+                                    <option value="medium">中</option>
+                                    <option value="low">低</option>
+                                </select>
+                                <button class="add-task-btn" onclick="showAddTaskModal()">添加任务</button>
+                            </div>
+                        </div>
+                        <div class="tasks-list" id="tasks-list">
+                            <!-- 任务卡片将在这里动态加载 -->
                         </div>
                     </div>
                 </div>
@@ -422,12 +657,14 @@
             const titles = {
                 chat: '智能聊天',
                 customers: '客户管理',
+                tasks: '任务管理',
                 analytics: '数据分析'
             };
             moduleTitle.textContent = titles[module];
 
             // 加载模块数据
             if (module === 'customers') loadCustomers();
+            if (module === 'tasks') loadTasks();
             if (module === 'analytics') loadAnalytics();
         }
 
@@ -554,6 +791,191 @@
             } catch (error) {
                 alert('网络错误');
             }
+        }
+
+        // 任务管理功能
+        async function loadTasks() {
+            try {
+                const statusFilter = document.getElementById('status-filter').value;
+                const priorityFilter = document.getElementById('priority-filter').value;
+                
+                let url = '/tasks';
+                const params = [];
+                if (statusFilter) params.push(`status=${statusFilter}`);
+                if (priorityFilter) params.push(`priority=${priorityFilter}`);
+                if (params.length > 0) url += '?' + params.join('&');
+                
+                const response = await fetch(url);
+                const tasks = await response.json();
+                const tasksList = document.getElementById('tasks-list');
+                tasksList.innerHTML = '';
+
+                tasks.forEach(task => {
+                    const taskCard = document.createElement('div');
+                    taskCard.className = 'task-card';
+                    taskCard.innerHTML = `
+                        <div class="task-header">
+                            <div>
+                                <div class="task-title">${task.title}</div>
+                                <div class="task-meta">
+                                    <span class="task-status status-${task.status}">${getStatusText(task.status)}</span>
+                                    <span class="task-priority priority-${task.priority}">${getPriorityText(task.priority)}</span>
+                                    ${task.assigned_to ? `<span>分配给: ${task.assigned_to}</span>` : ''}
+                                    ${task.due_date ? `<span>截止: ${new Date(task.due_date).toLocaleDateString()}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="task-actions">
+                                <button class="task-action-btn edit-btn" onclick="editTask(${task.id})">编辑</button>
+                                <button class="task-action-btn delete-btn" onclick="deleteTask(${task.id})">删除</button>
+                            </div>
+                        </div>
+                        ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
+                    `;
+                    tasksList.appendChild(taskCard);
+                });
+            } catch (error) {
+                console.error('Failed to load tasks:', error);
+            }
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': '待处理',
+                'in_progress': '进行中',
+                'completed': '已完成',
+                'cancelled': '已取消'
+            };
+            return statusMap[status] || status;
+        }
+
+        function getPriorityText(priority) {
+            const priorityMap = {
+                'high': '高',
+                'medium': '中',
+                'low': '低'
+            };
+            return priorityMap[priority] || priority;
+        }
+
+        function filterTasks() {
+            loadTasks();
+        }
+
+        function showAddTaskModal() {
+            // 创建任务添加模态框
+            const modal = document.createElement('div');
+            modal.id = 'add-task-modal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>添加任务</h3>
+                        <span class="close" onclick="hideAddTaskModal()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="add-task-form">
+                            <div class="form-group">
+                                <label for="task-title">任务标题</label>
+                                <input type="text" id="task-title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="task-description">任务描述</label>
+                                <textarea id="task-description" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="task-priority">优先级</label>
+                                <select id="task-priority">
+                                    <option value="low">低</option>
+                                    <option value="medium" selected>中</option>
+                                    <option value="high">高</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="task-assigned-to">分配给</label>
+                                <input type="text" id="task-assigned-to">
+                            </div>
+                            <div class="form-group">
+                                <label for="task-due-date">截止日期</label>
+                                <input type="date" id="task-due-date">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button onclick="hideAddTaskModal()">取消</button>
+                        <button onclick="addTask()">添加</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.style.display = 'flex';
+        }
+
+        function hideAddTaskModal() {
+            const modal = document.getElementById('add-task-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        async function addTask() {
+            const title = document.getElementById('task-title').value;
+            const description = document.getElementById('task-description').value;
+            const priority = document.getElementById('task-priority').value;
+            const assignedTo = document.getElementById('task-assigned-to').value;
+            const dueDate = document.getElementById('task-due-date').value;
+
+            if (!title) {
+                alert('请填写任务标题');
+                return;
+            }
+
+            try {
+                const response = await fetch('/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: title,
+                        description: description,
+                        priority: priority,
+                        assigned_to: assignedTo,
+                        due_date: dueDate || null
+                    })
+                });
+
+                if (response.ok) {
+                    hideAddTaskModal();
+                    loadTasks();
+                } else {
+                    alert('添加失败');
+                }
+            } catch (error) {
+                alert('网络错误');
+            }
+        }
+
+        async function deleteTask(taskId) {
+            if (!confirm('确定要删除这个任务吗？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/tasks/${taskId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadTasks();
+                } else {
+                    alert('删除失败');
+                }
+            } catch (error) {
+                alert('网络错误');
+            }
+        }
+
+        function editTask(taskId) {
+            // 这里可以实现编辑功能，暂时显示提示
+            alert('编辑功能即将实现');
         }
 
         // 分析功能

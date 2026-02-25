@@ -34,6 +34,18 @@ class Interaction(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     sentiment = db.Column(db.String(20))  # positive, negative, neutral
 
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    status = db.Column(db.String(20), default='pending')  # pending, in_progress, completed, cancelled
+    priority = db.Column(db.String(10), default='medium')  # low, medium, high
+    assigned_to = db.Column(db.String(100))  # 分配给谁
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    due_date = db.Column(db.DateTime)
+
 # 创建数据库表
 with app.app_context():
     db.create_all()
@@ -250,6 +262,78 @@ def get_models():
         {'id': 'GPT-3.5', 'name': 'GPT-3.5 Turbo', 'provider': 'OpenAI'}
     ]
     return jsonify(models)
+
+@app.route('/tasks', methods=['GET'])
+def get_tasks():
+    status_filter = request.args.get('status')
+    priority_filter = request.args.get('priority')
+    
+    query = Task.query
+    
+    if status_filter:
+        query = query.filter_by(status=status_filter)
+    if priority_filter:
+        query = query.filter_by(priority=priority_filter)
+    
+    tasks = query.order_by(Task.created_at.desc()).all()
+    return jsonify([{
+        'id': t.id,
+        'title': t.title,
+        'description': t.description,
+        'status': t.status,
+        'priority': t.priority,
+        'assigned_to': t.assigned_to,
+        'customer_id': t.customer_id,
+        'created_at': t.created_at.isoformat(),
+        'updated_at': t.updated_at.isoformat(),
+        'due_date': t.due_date.isoformat() if t.due_date else None
+    } for t in tasks])
+
+@app.route('/tasks', methods=['POST'])
+def create_task():
+    data = request.json
+    new_task = Task(
+        title=data['title'],
+        description=data.get('description', ''),
+        priority=data.get('priority', 'medium'),
+        assigned_to=data.get('assigned_to'),
+        customer_id=data.get('customer_id'),
+        due_date=datetime.fromisoformat(data['due_date']) if data.get('due_date') else None
+    )
+    db.session.add(new_task)
+    db.session.commit()
+    return jsonify({
+        'id': new_task.id,
+        'message': 'Task created successfully'
+    }), 201
+
+@app.route('/tasks/<int:task_id>', methods=['PUT'])
+def update_task(task_id):
+    task = Task.query.get_or_404(task_id)
+    data = request.json
+    
+    if 'title' in data:
+        task.title = data['title']
+    if 'description' in data:
+        task.description = data['description']
+    if 'status' in data:
+        task.status = data['status']
+    if 'priority' in data:
+        task.priority = data['priority']
+    if 'assigned_to' in data:
+        task.assigned_to = data['assigned_to']
+    if 'due_date' in data:
+        task.due_date = datetime.fromisoformat(data['due_date']) if data['due_date'] else None
+    
+    db.session.commit()
+    return jsonify({'message': 'Task updated successfully'})
+
+@app.route('/tasks/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    task = Task.query.get_or_404(task_id)
+    db.session.delete(task)
+    db.session.commit()
+    return jsonify({'message': 'Task deleted successfully'})
 
 @app.route('/')
 def home():
